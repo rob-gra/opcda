@@ -37,6 +37,11 @@ func Connect(progID, node string) (opcServer *OPCServer, err error) {
 	if err != nil {
 		return nil, NewOPCWrapperError("get clsid", err)
 	}
+
+	if isInProcServer(clsid.String()) {
+		location = com.CLSCTX_INPROC_SERVER
+	}
+
 	iUnknownServer, err := com.MakeCOMObjectEx(node, location, clsid, &com.IID_IOPCServer)
 	if err != nil {
 		return nil, NewOPCWrapperError("make com object IOPCServer", err)
@@ -146,6 +151,17 @@ func getClsidFromProgIDKey(hProgIDKey registry.Key) (string, *windows.GUID, erro
 	}
 	clsid, err := windows.GUIDFromString(clsidStr)
 	return clsidStr, &clsid, err
+}
+
+func isInProcServer(clsid string) bool {
+	inProcPath := fmt.Sprintf(`SOFTWARE\Classes\CLSID\%s\InprocServer32`, clsid)
+	hInprocKey, err := registry.OpenKey(registry.LOCAL_MACHINE, inProcPath, registry.READ)
+	if err == nil {
+		defer hInprocKey.Close()
+		return true
+	}
+
+	return false
 }
 
 type ServerInfo struct {

@@ -37,6 +37,7 @@ func CoTaskMemFree(pv unsafe.Pointer) {
 type CLSCTX uint32
 
 const (
+	CLSCTX_INPROC_SERVER CLSCTX = 0x1
 	CLSCTX_LOCAL_SERVER  CLSCTX = 0x4
 	CLSCTX_REMOTE_SERVER CLSCTX = 0x10
 )
@@ -188,7 +189,7 @@ func MakeCOMObjectEx(hostname string, serverLocation CLSCTX, requestedClass *win
 		Hr:   0,
 	}
 	var serverInfoPtr *COSERVERINFO = nil
-	if serverLocation != CLSCTX_LOCAL_SERVER {
+	if serverLocation != CLSCTX_LOCAL_SERVER && serverLocation != CLSCTX_INPROC_SERVER {
 		serverInfoPtr = &COSERVERINFO{
 			PwszName: windows.StringToUTF16Ptr(hostname),
 		}
