@@ -38,8 +38,14 @@ func CoTaskMemFree(pv unsafe.Pointer) {
 type CLSCTX uint32
 
 const (
+	CLSCTX_INPROC_SERVER CLSCTX = 0x1
 	CLSCTX_LOCAL_SERVER  CLSCTX = 0x4
 	CLSCTX_REMOTE_SERVER CLSCTX = 0x10
+
+	// CLSCTX_LOCAL includes CLSCTX_INPROC_SERVER so that OPC servers
+	// registered only as InprocServer32 (in-process 32-bit COM servers)
+	// can be created in addition to out-of-process LocalServer32 ones.
+	CLSCTX_LOCAL CLSCTX = CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER
 )
 
 type COAUTHIDENTITY struct {
@@ -189,7 +195,7 @@ func MakeCOMObjectEx(hostname string, serverLocation CLSCTX, requestedClass *win
 		Hr:   0,
 	}
 	var serverInfoPtr *COSERVERINFO = nil
-	if serverLocation != CLSCTX_LOCAL_SERVER {
+	if serverLocation&CLSCTX_REMOTE_SERVER != 0 {
 		serverInfoPtr = &COSERVERINFO{
 			PwszName: windows.StringToUTF16Ptr(hostname),
 		}
