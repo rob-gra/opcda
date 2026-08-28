@@ -30,7 +30,7 @@ type OPCServer struct {
 
 // Connect connect to OPC server
 func Connect(progID, node string) (opcServer *OPCServer, err error) {
-	location := com.CLSCTX_LOCAL_SERVER
+	location := com.CLSCTX_LOCAL
 	if !com.IsLocal(node) {
 		location = com.CLSCTX_REMOTE_SERVER
 	}
@@ -83,7 +83,7 @@ func Connect(progID, node string) (opcServer *OPCServer, err error) {
 }
 
 func getClsID(progID, node string, location com.CLSCTX) (clsid *windows.GUID, err error) {
-	if location == com.CLSCTX_LOCAL_SERVER {
+	if location&com.CLSCTX_REMOTE_SERVER == 0 {
 		id, err := windows.GUIDFromString(progID)
 		if err != nil {
 			return nil, NewOPCWrapperError("windows.GUIDFromString", err)
@@ -204,7 +204,7 @@ func GetOPCServers(node string) ([]*ServerInfo, error) {
 }
 
 func getServersFromOpcServerListV2(node string) ([]*ServerInfo, error) {
-	location := com.CLSCTX_LOCAL_SERVER
+	location := com.CLSCTX_LOCAL
 	if !com.IsLocal(node) {
 		location = com.CLSCTX_REMOTE_SERVER
 	}
@@ -238,7 +238,7 @@ func getServersFromOpcServerListV2(node string) ([]*ServerInfo, error) {
 }
 
 func getServersFromOpcServerListV1(node string) ([]*ServerInfo, error) {
-	location := com.CLSCTX_LOCAL_SERVER
+	location := com.CLSCTX_LOCAL
 	if !com.IsLocal(node) {
 		location = com.CLSCTX_REMOTE_SERVER
 	}
